@@ -1,0 +1,32 @@
+{
+  "id": "traj_1779541738945_j636kunrv",
+  "goal": "广度学习循环",
+  "context": {
+    "mode": "degraded",
+    "successCount": 0
+  },
+  "steps": [
+    {
+      "seq": 0,
+      "observation": "sources attempted",
+      "thought": "filter by available",
+      "action": "learnGitHub/Arxiv/Crossref",
+      "result": "no new",
+      "reflection": "",
+      "ts": 1779541738945
+    },
+    {
+      "seq": 1,
+      "observation": "coverage: N/A",
+      "thought": "update coverage",
+      "action": "updateCoverage",
+      "result": "done",
+      "reflection": "",
+      "ts": 1779541738945
+    }
+  ],
+  "status": "partial",
+  "createdAt": 1779541738945,
+  "completedAt": 1779541738945,
+  "duration": 0
+}

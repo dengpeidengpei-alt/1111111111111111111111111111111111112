@@ -8,6 +8,33 @@
       "duration": 0,
       "hasReflection": true,
       "createdAt": 1779541106831
+    },
+    {
+      "id": "traj_1779541410629_opatkpoz2",
+      "goal": "扫描GitHub AI趋势→学习新项目→记录到wiki",
+      "status": "success",
+      "stepCount": 4,
+      "duration": 0,
+      "hasReflection": true,
+      "createdAt": 1779541410629
+    },
+    {
+      "id": "traj_1779541738945_j636kunrv",
+      "goal": "广度学习循环",
+      "status": "partial",
+      "stepCount": 2,
+      "duration": 0,
+      "hasReflection": false,
+      "createdAt": 1779541738945
+    },
+    {
+      "id": "traj_1779541814476_hlu5yqsi7",
+      "goal": "广度学习循环",
+      "status": "success",
+      "stepCount": 2,
+      "duration": 0,
+      "hasReflection": false,
+      "createdAt": 1779541814476
     }
   ]
 }

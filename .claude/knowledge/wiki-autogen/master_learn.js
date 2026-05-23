@@ -27,6 +27,10 @@ const { addEntity, buildFrontmatter, addSnapshot } = require(WIKI_AUTO_DIR + 'kn
 const { record: logFeedback } = require(WIKI_AUTO_DIR + 'feedback_log')
 const { suggestNextTopics, updateCoverage, getCoverageScore } = require(WIKI_AUTO_DIR + 'coverage_tracker')
 
+// 轨迹记录 + 记忆系统
+const trajectory = require(WIKI_AUTO_DIR + 'trajectory_format')
+const memory = require(WIKI_AUTO_DIR + 'memory_layer')
+
 // 学习记录
 const LEARNED_REPOS = 'E:/Claude/.learnings/learned_repos.json'
 const LEARNED_ARXIV = 'E:/Claude/.learnings/learned_arxiv.json'
@@ -295,8 +299,20 @@ ${keyFeatures || '[待深入研究]'}
         console.log('[Query扩展] arXiv新增:', arXivQueries.join(', '))
       }
     }
+    // 记录轨迹和记忆
+    try {
+      memory.storeEpisodic('GitHub学习:'+repo.full_name, ['fetch','filter','save','update'], 'success')
+    } catch(e) {}
+
     return true
-  } catch (e) { recordFailure('github', e); logFeedback('failure', { source: 'github', error: e.message }); console.log('[GitHub Err]', e.message) }
+  } catch (e) {
+    recordFailure('github', e)
+    logFeedback('failure', { source: 'github', error: e.message })
+    try {
+      memory.storeEpisodic('GitHub学习', ['fetch'], 'failure', e)
+    } catch(e) {}
+    console.log('[GitHub Err]', e.message)
+  }
   return false
 }
 
@@ -389,8 +405,14 @@ ${paper.summary || '[无摘要]'}
     record({ broad: true, deep: false, topic: paper.id, stars: 0, added: true })
     recordSuccess('arxiv')
     logFeedback('success', { source: 'arxiv', topic: paper.id })
+    try { memory.storeEpisodic('arXiv学习:'+paper.id, ['fetch','parse','save'], 'success') } catch(e) {}
     return true
-  } catch (e) { recordFailure('arxiv', e); logFeedback('failure', { source: 'arxiv', error: e.message }); console.log('[arXiv Err]', e.message) }
+  } catch (e) {
+    recordFailure('arxiv', e)
+    logFeedback('failure', { source: 'arxiv', error: e.message })
+    try { memory.storeEpisodic('arXiv学习', ['fetch'], 'failure', e) } catch(e) {}
+    console.log('[arXiv Err]', e.message)
+  }
   return false
 }
 
@@ -482,8 +504,14 @@ ${abstract.substring(0, 800) || '[无摘要]'}
     record({ broad: true, deep: false, topic: title.substring(0, 30), stars: 0, added: true })
     recordSuccess('crossref')
     logFeedback('success', { source: 'crossref', topic: title.substring(0, 30) })
+    try { memory.storeEpisodic('Crossref学习:'+title.substring(0,20), ['fetch','parse','save'], 'success') } catch(e) {}
     return true
-  } catch (e) { recordFailure('crossref', e); logFeedback('failure', { source: 'crossref', error: e.message }); console.log('[Crossref Err]', e.message) }
+  } catch (e) {
+    recordFailure('crossref', e)
+    logFeedback('failure', { source: 'crossref', error: e.message })
+    try { memory.storeEpisodic('Crossref学习', ['fetch'], 'failure', e) } catch(e) {}
+    console.log('[Crossref Err]', e.message)
+  }
   return false
 }
 
@@ -661,10 +689,27 @@ async function learn() {
   const successCount = results.filter(r => r.status === 'fulfilled' && r.value === true).length
   console.log(`[主循环] 完成，${successCount}/3 新增 | 模式: ${mode}`)
 
-  // SWE-bench风格验证（竞品差距2）- 每50轮运行一次
+  // 记录标准轨迹（trajectory > knowledge）
+  try {
+    const traj = trajectory.createTrajectory('广度学习循环', { mode, successCount })
+    trajectory.addStep(traj, { observation: 'sources attempted', thought: 'filter by available', action: 'learnGitHub/Arxiv/Crossref', result: successCount > 0 ? 'success' : 'no new' })
+    trajectory.addStep(traj, { observation: 'coverage: ' + (process.env.LAST_COVERAGE || 'N/A'), thought: 'update coverage', action: 'updateCoverage', result: 'done' })
+    trajectory.completeTrajectory(traj, successCount > 0 ? 'success' : 'partial')
+  } catch(e) {}
+
+  // 运行进化循环（每20轮）
   const sysState = JSON.parse(fs.readFileSync(SYSTEM_STATE, 'utf-8'))
   sysState.verifyRounds = (sysState.verifyRounds || 0) + 1
   fs.writeFileSync(SYSTEM_STATE, JSON.stringify(sysState))
+  if (sysState.verifyRounds % 20 === 0) {
+    try {
+      const evolution = require(WIKI_AUTO_DIR + 'evolution_loop')
+      const er = await evolution.runEvolutionCycle({})
+      if (er.insights > 0) console.log('[Evolution] 洞察:', er.insights, '策略:', er.patterns)
+    } catch(e) { console.log('[Evolution Err]', e.message) }
+  }
+
+  // SWE-bench验证 (移到这里避免重复)
   if (sysState.verifyRounds >= 50) {
     sysState.verifyRounds = 0
     fs.writeFileSync(SYSTEM_STATE, JSON.stringify(sysState))
