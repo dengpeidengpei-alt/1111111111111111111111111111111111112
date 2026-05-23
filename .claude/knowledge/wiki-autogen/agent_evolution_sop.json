@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "name": "Agent进化标准流程",
+  "description": "参照用户指引构建的Agent自我进化SOP",
+
+  "stages": [
+    {
+      "name": "接任务",
+      "description": "接收任务，理解目标",
+      "actions": ["理解goal", "分析context", "检查memory"]
+    },
+    {
+      "name": "规划",
+      "description": "分解任务，制定计划",
+      "actions": ["Task Decomposition", "Tool Selection", "Step Ordering"]
+    },
+    {
+      "name": "执行",
+      "description": "按计划执行，记录轨迹",
+      "actions": ["Execute Step", "Record Trajectory", "Collect Observations"]
+    },
+    {
+      "name": "评估",
+      "description": "评估结果，打分",
+      "actions": ["Check Result", "Score", "Compare with Goal"]
+    },
+    {
+      "name": "反思",
+      "description": "反思成功/失败原因",
+      "actions": ["Analyze Errors", "Extract Lessons", "Update Memory"]
+    },
+    {
+      "name": "改进",
+      "description": "基于反思更新策略",
+      "actions": ["Update Prompt", "Add Rules", "Improve Tools"]
+    }
+  ],
+
+  "trajectory_format": {
+    "goal": "任务目标",
+    "observation": "观察结果",
+    "thought": "思考过程",
+    "action": "执行动作",
+    "result": "结果",
+    "reflection": "反思"
+  },
+
+  "error_handling": {
+    "retry_strategy": "exponential backoff",
+    "max_retries": 3,
+    "fallback": "degrade mode"
+  },
+
+  "memory_integration": {
+    "episodic": "具体事件",
+    "semantic": "抽象知识",
+    "reflection": "经验总结"
+  },
+
+  "core_principle": "trajectory > knowledge"
+}

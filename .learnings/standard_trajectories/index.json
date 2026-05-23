@@ -1,0 +1,13 @@
+{
+  "trajectories": [
+    {
+      "id": "traj_1779541106831_lvin1pgan",
+      "goal": "扫描GitHub AI趋势并学习新项目",
+      "status": "success",
+      "stepCount": 3,
+      "duration": 0,
+      "hasReflection": true,
+      "createdAt": 1779541106831
+    }
+  ]
+}
