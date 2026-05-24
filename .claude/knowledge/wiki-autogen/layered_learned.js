@@ -288,6 +288,37 @@ function resetEpochs() {
   return true
 }
 
+// ========== 从旧系统导入 ==========
+
+/**
+ * 从旧 learned_repos.json 导入到新系统
+ */
+function importFromLegacy() {
+  const legacyFile = LEARNED_DIR + 'learned_repos.json'
+  if (!fs.existsSync(legacyFile)) return { imported: 0 }
+
+  try {
+    const legacy = JSON.parse(fs.readFileSync(legacyFile, 'utf-8'))
+    const repos = legacy.repos || []
+    let imported = 0
+    for (const repo of repos) {
+      if (!isRecentlyLearnedExact(repo)) {
+        markLearnedExact(repo)
+        markLearnedEpoch(repo)
+        imported++
+      }
+    }
+    console.log(`[layered_learned] 从旧系统导入 ${imported}/${repos.length} 条`)
+    return { imported, total: repos.length }
+  } catch (e) {
+    console.error('[layered_learned] 导入旧系统失败:', e.message)
+    return { imported: 0, error: e.message }
+  }
+}
+
+// 启动时自动导入一次
+const importResult = importFromLegacy()
+
 module.exports = {
   isRecentlyLearned,
   markLearned,
@@ -302,6 +333,7 @@ module.exports = {
   cleanup,
   getStatus,
   getEpochStats,
+  importFromLegacy,
   simpleFingerprint,
   similarity,
   CONFIG
